@@ -1,0 +1,4 @@
+package: github.com/dakatsuka/ecs-deploy
+import:
+- package: github.com/aws/aws-sdk-go
+- package: gopkg.in/alecthomas/kingpin.v2

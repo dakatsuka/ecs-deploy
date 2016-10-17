@@ -1,0 +1,7 @@
+*.exe
+*.test
+*.prof
+
+cmd/ecs-deploy/ecs-deploy
+vendor/
+pkg/
