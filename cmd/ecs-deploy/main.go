@@ -20,7 +20,7 @@ func main() {
 	kingpin.Version(version)
 	kingpin.Parse()
 
-	err := ecsdeploy.Run(cluster, service, container, image)
+	err := ecsdeploy.Run(*cluster, *service, *container, *image)
 
 	if err != nil {
 		fmt.Println("error:", err)

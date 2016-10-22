@@ -8,7 +8,7 @@ import (
 	"log"
 )
 
-func Run(cluster *string, service *string, container *string, image *string) error {
+func Run(cluster string, service string, container string, image string) error {
 	sess, err := session.NewSession()
 
 	if err != nil {
@@ -54,12 +54,12 @@ func Run(cluster *string, service *string, container *string, image *string) err
 	return nil
 }
 
-func DescribeActiveService(svc *ecs.ECS, cluster *string, service *string) (*ecs.Service, error) {
+func DescribeActiveService(svc *ecs.ECS, cluster string, service string) (*ecs.Service, error) {
 	params := &ecs.DescribeServicesInput{
 		Services: []*string{
-			aws.String(*service),
+			aws.String(service),
 		},
-		Cluster: aws.String(*cluster),
+		Cluster: aws.String(cluster),
 	}
 
 	resp, err := svc.DescribeServices(params)
@@ -69,7 +69,7 @@ func DescribeActiveService(svc *ecs.ECS, cluster *string, service *string) (*ecs
 	}
 
 	for _, v := range resp.Services {
-		if *v.ServiceName == *service && *v.Status == "ACTIVE" {
+		if *v.ServiceName == service && *v.Status == "ACTIVE" {
 			return v, nil
 		}
 	}
@@ -77,30 +77,30 @@ func DescribeActiveService(svc *ecs.ECS, cluster *string, service *string) (*ecs
 	return nil, errors.New("active service does not found")
 }
 
-func UpdateImage(svc *ecs.ECS, task ecs.TaskDefinition, container *string, image *string) (*ecs.RegisterTaskDefinitionOutput, error) {
+func UpdateImage(svc *ecs.ECS, task ecs.TaskDefinition, container string, image string) (*ecs.RegisterTaskDefinitionOutput, error) {
 	var newContainerDefinitions []*ecs.ContainerDefinition
 
 	for _, v := range task.ContainerDefinitions {
-		if *v.Name == *container {
-			v.Image = image
+		if *v.Name == container {
+			v.Image = aws.String(image)
 		}
 		newContainerDefinitions = append(newContainerDefinitions, v)
 	}
 
 	params := &ecs.RegisterTaskDefinitionInput{
 		ContainerDefinitions: newContainerDefinitions,
-		Family:               aws.String(*task.Family),
-		TaskRoleArn:          aws.String(*task.TaskRoleArn),
+		Family:               task.Family,
+		TaskRoleArn:          task.TaskRoleArn,
 	}
 
 	return svc.RegisterTaskDefinition(params)
 }
 
-func UpdateService(svc *ecs.ECS, task ecs.TaskDefinition, cluster *string, service *string) (*ecs.UpdateServiceOutput, error) {
+func UpdateService(svc *ecs.ECS, task ecs.TaskDefinition, cluster string, service string) (*ecs.UpdateServiceOutput, error) {
 	params := &ecs.UpdateServiceInput{
-		Service:        aws.String(*service),
-		Cluster:        aws.String(*cluster),
-		TaskDefinition: aws.String(*task.TaskDefinitionArn),
+		Service:        aws.String(service),
+		Cluster:        aws.String(cluster),
+		TaskDefinition: task.TaskDefinitionArn,
 	}
 
 	return svc.UpdateService(params)
