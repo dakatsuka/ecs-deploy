@@ -91,6 +91,7 @@ func UpdateImage(svc *ecs.ECS, task ecs.TaskDefinition, container string, image 
 		ContainerDefinitions: newContainerDefinitions,
 		Family:               task.Family,
 		TaskRoleArn:          task.TaskRoleArn,
+		Volumes:              task.Volumes,
 	}
 
 	return svc.RegisterTaskDefinition(params)
