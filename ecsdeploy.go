@@ -8,7 +8,7 @@ import (
 	"log"
 )
 
-func Run(cluster string, service string, container string, image string) error {
+func Run(cluster string, service string, container string, image string, keepService bool) error {
 	sess, err := session.NewSession()
 
 	if err != nil {
@@ -43,12 +43,14 @@ func Run(cluster string, service string, container string, image string) error {
 		log.Println("Registered TaskDefinition with new image: ", *newTask.TaskDefinition.TaskDefinitionArn)
 	}
 
-	resp, err := UpdateService(svc, *newTask.TaskDefinition, cluster, service)
+	if keepService == false {
+		resp, err := UpdateService(svc, *newTask.TaskDefinition, cluster, service)
 
-	if err != nil {
-		return err
-	} else {
-		log.Println("Updated service: ", *resp.Service.TaskDefinition)
+		if err != nil {
+			return err
+		} else {
+			log.Println("Updated service: ", *resp.Service.TaskDefinition)
+		}
 	}
 
 	return nil
