@@ -13,6 +13,7 @@ func main() {
 	var (
 		cluster     = kingpin.Flag("cluster", "Set cluster name").Required().String()
 		service     = kingpin.Flag("service", "Set service name").Required().String()
+		taskFamily  = kingpin.Flag("task-family", "Set task definition family").Required().String()
 		container   = kingpin.Flag("container", "Set container name").Required().String()
 		image       = kingpin.Flag("image", "Set image").Required().String()
 		keepService = kingpin.Flag("keep-service", "Not update service").Bool()
@@ -21,7 +22,7 @@ func main() {
 	kingpin.Version(version)
 	kingpin.Parse()
 
-	err := ecsdeploy.Run(*cluster, *service, *container, *image, *keepService)
+	err := ecsdeploy.Run(*cluster, *service, *taskFamily, *container, *image, *keepService)
 
 	if err != nil {
 		fmt.Println("error:", err)

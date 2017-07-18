@@ -12,8 +12,9 @@ $ export AWS_SECRET_ACCESS_KEY=
 $ ecs-deploy \
   --cluster=<cluster-name> \
   --service=<service-name> \
+  --task-family=<task-family>
   --container=<container-name> \
-  --image=<new image> 
+  --image=<new image> \
 ```
 
 ## Help
@@ -24,9 +25,12 @@ usage: ecs-deploy --cluster=CLUSTER --service=SERVICE --container=CONTAINER --im
 
 Flags:
   --help                 Show context-sensitive help (also try --help-long and --help-man).
-  --cluster=CLUSTER      Set cluster name
-  --service=SERVICE      Set service name
-  --container=CONTAINER  Set container name
-  --image=IMAGE          Set image
-  --version              Show application version.
+  --cluster=CLUSTER          Set cluster name
+  --service=SERVICE          Set service name
+  --task-family=TASK-FAMILY  Set task definition family
+  --container=CONTAINER      Set container name
+  --image=IMAGE              Set image
+  --keep-service             Not update service
+  --version                  Show application version.
+  --help                     Show context-sensitive help (also try --help-long and --help-man).
 ```

@@ -2,13 +2,15 @@ package ecsdeploy
 
 import (
 	"errors"
+	"log"
+	"strings"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ecs"
-	"log"
 )
 
-func Run(cluster string, service string, container string, image string, keepService bool) error {
+func Run(cluster string, service string, taskFamily string, container string, image string, keepService bool) error {
 	sess, err := session.NewSession()
 
 	if err != nil {
@@ -17,14 +19,14 @@ func Run(cluster string, service string, container string, image string, keepSer
 
 	svc := ecs.New(sess)
 
-	ecsService, err := DescribeActiveService(svc, cluster, service)
+	taskDefinition, err := DescribeLatestTaskDefinition(svc, taskFamily)
 
 	if err != nil {
 		return err
 	}
 
 	params := &ecs.DescribeTaskDefinitionInput{
-		TaskDefinition: aws.String(*ecsService.TaskDefinition),
+		TaskDefinition: taskDefinition,
 	}
 
 	task, err := svc.DescribeTaskDefinition(params)
@@ -56,27 +58,24 @@ func Run(cluster string, service string, container string, image string, keepSer
 	return nil
 }
 
-func DescribeActiveService(svc *ecs.ECS, cluster string, service string) (*ecs.Service, error) {
-	params := &ecs.DescribeServicesInput{
-		Services: []*string{
-			aws.String(service),
-		},
-		Cluster: aws.String(cluster),
+func DescribeLatestTaskDefinition(svc *ecs.ECS, taskFamily string) (*string, error) {
+	ListTaskDefinitionsInput := &ecs.ListTaskDefinitionsInput{
+		FamilyPrefix: aws.String(taskFamily),
+		MaxResults:   aws.Int64(1),
+		Sort:         aws.String("DESC"),
+		Status:       aws.String("ACTIVE"),
 	}
 
-	resp, err := svc.DescribeServices(params)
+	listTaskDefinitionsOutput, err := svc.ListTaskDefinitions(ListTaskDefinitionsInput)
 
 	if err != nil {
 		return nil, err
+	} else if len(listTaskDefinitionsOutput.TaskDefinitionArns) == 0 {
+		return nil, errors.New("active task definition does not found")
 	}
 
-	for _, v := range resp.Services {
-		if *v.ServiceName == service && *v.Status == "ACTIVE" {
-			return v, nil
-		}
-	}
-
-	return nil, errors.New("active service does not found")
+	splitArn := strings.Split(*listTaskDefinitionsOutput.TaskDefinitionArns[0], "/")
+	return aws.String(splitArn[len(splitArn)-1]), nil
 }
 
 func UpdateImage(svc *ecs.ECS, task ecs.TaskDefinition, container string, image string) (*ecs.RegisterTaskDefinitionOutput, error) {
