@@ -12,9 +12,9 @@ $ export AWS_SECRET_ACCESS_KEY=
 $ ecs-deploy \
   --cluster=<cluster-name> \
   --service=<service-name> \
-  --task-family=<task-family>
+  --task-family=<task-family> \
   --container=<container-name> \
-  --image=<new image> \
+  --image=<new image>
 ```
 
 ## Help
